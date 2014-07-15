@@ -13,6 +13,19 @@ namespace PSPFolderCleaner
     /// </summary>
     class Program
     {
+        #region
+
+        static List<string> _extensionsToNotDelete =
+            new List<string>()
+            {
+                ".cs",
+                ".wxs",
+                ".html",
+                ".xaml"
+            };
+        
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -27,9 +40,20 @@ namespace PSPFolderCleaner
 
             if (result == DialogResult.OK)
             {
-                GoAndDeleteNonCSFiles(new DirectoryInfo(folderBrowserDialog.SelectedPath));
+                Console.Write("Are you sure you want to delete all the files in {0}? (yes, no):", folderBrowserDialog.SelectedPath);
+                string areYouSure = Console.ReadLine();
+                if(areYouSure.Equals("yes"))
+                {
+                    GoAndDeleteNonCSFiles(new DirectoryInfo(folderBrowserDialog.SelectedPath));
 
-                Console.WriteLine("Purge complete.");
+                    Console.WriteLine("Purge complete. Press any key to exit...");
+                    Console.Read();
+                }
+                else
+                {
+                    Console.WriteLine("Didn't do anything. Press any key to exit...");
+                    Console.Read();
+                }
             }
         }
  
@@ -38,7 +62,7 @@ namespace PSPFolderCleaner
             IEnumerable<FileInfo> files = directory.EnumerateFiles();
             foreach(FileInfo file in files)
             {
-                if(file.Extension != ".cs" || file.Extension != ".wxs")
+                if(!_extensionsToNotDelete.Contains(file.Extension))
                 {
                     Console.WriteLine("{0} deleted!", file.FullName);
                     file.Delete();
